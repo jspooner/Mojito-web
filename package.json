@@ -1,0 +1,16 @@
+{
+  "name": "mojito-web",
+  "version": "1.0.0",
+  "description": "Mojito Budget Builder",
+  "main": "index.js",
+  "author": "Jonathan Spooner",
+  "license": "Copywrite Spooner",
+  "private": true,
+  "devDependencies": {
+    "webpack": "^3.11.0",
+    "webpack-dev-server": "^2.11.1"
+  },
+  "scripts": {
+    "server": "webpack-dev-server --hot --inline --progress --config webpack.dev.config.js --content-base public"
+  }
+}
