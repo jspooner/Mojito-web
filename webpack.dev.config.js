@@ -4,7 +4,7 @@ const path = require('path');
 // NPM
 const webpack = require('webpack');
 // Local
-let config = require('./webpack.config');
+let config = require('./webpack.common');
 // Fast Rebuild 	quality: original source (lines only)
 config.devtool = 'cheap-module-eval-source-map';
 // Add Hot Reload Entries

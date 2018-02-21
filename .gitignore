@@ -58,3 +58,8 @@ typings/
 .env
 
 **/.DS_Store
+<<<<<<< HEAD
+=======
+node_modules/*
+yarn-error.log
+>>>>>>> Production webpack build
