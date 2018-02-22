@@ -16,5 +16,8 @@
   "scripts": {
     "server": "webpack-dev-server --hot --inline --progress --config config/webpack/development.js --content-base public",
     "build": "webpack --config config/webpack/production.js"
+  },
+  "dependencies": {
+    "redux": "^3.7.2"
   }
 }
