@@ -1,5 +1,6 @@
-import { createStore } from 'redux'
-
+import { createStore } from 'redux';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 function counter(state = 0, action) {
   switch (action.type) {
@@ -12,34 +13,66 @@ function counter(state = 0, action) {
   }
 }
 
+const Counter = ({
+  value,
+  onIncrement,
+  onDecrement
+}) => (
+  <div>
+    <h1>{value}</h1>
+    <button onClick={onIncrement}>+</button>
+    <button onClick={onDecrement}>-</button>
+  </div>
+);
+
+// Example of createStore from scratch
+// const createStore = (reducer) => {
+//   let state;
+//   let listeners = [];
+//
+//   const getState = () => state;
+//
+//   const dispatch = (action) => {
+//     state = reducer(state, action);
+//     listeners.forEach(listener => listener());
+//   };
+//
+//   const subscribe = (listener) => {
+//     listeners.push(listener);
+//     return () => {
+//       listeners = listeners.filter(l => l !== listener);
+//     };
+//   };
+//
+//   dispatch({});
+//
+//   return { getState, dispatch, subscribe };
+// }
+// let store = createStore(counter);
 let store = createStore(counter,window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
 
-// Controller or Command
-store.subscribe(() =>
-  console.log(store.getState())
-)
+const render = () => {
+  // document.body.innerText = store.getState();
+  ReactDOM.render(
+    <Counter 
+      value={store.getState()}
+      onIncrement={() =>
+        store.dispatch({type: 'INCREMENT'})
+      }
+      onDecrement={() =>
+        store.dispatch({type: 'DECREMENT'})
+      }
+      />,
+    document.getElementById('root')
+  );
+};
+store.subscribe(render)
+render();
 
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'INCREMENT' })
-store.dispatch({ type: 'DECREMENT' })
+// const render
+
+// document.addEventListener('click', () => {
+//   store.dispatch({ type: 'INCREMENT' })
+//   // store.dispatch({ type: 'DECREMENT' })
+// });
+
