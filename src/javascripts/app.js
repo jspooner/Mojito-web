@@ -25,6 +25,44 @@ const Counter = ({
   </div>
 );
 
+// components/SpendingTable.js
+const SpendingTable = ({}) => (
+  <table>
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>2018-01</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Shopping</td>
+        <td>$100.00</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>Auto Payment</td>
+        <td>$400.00</td>
+      </tr>
+    </tfoot>
+  </table>
+)
+
+const App = () => (
+  <div>
+    <Counter
+      value={store.getState()}
+      onIncrement={() =>
+        store.dispatch({type: 'INCREMENT'})
+      }
+      onDecrement={() =>
+        store.dispatch({type: 'DECREMENT'})
+      }
+      />
+      <SpendingTable />
+  </div>
+)
 // Example of createStore from scratch
 // const createStore = (reducer) => {
 //   let state;
@@ -54,15 +92,17 @@ let store = createStore(counter,window.__REDUX_DEVTOOLS_EXTENSION__ && window.__
 const render = () => {
   // document.body.innerText = store.getState();
   ReactDOM.render(
-    <Counter 
-      value={store.getState()}
-      onIncrement={() =>
-        store.dispatch({type: 'INCREMENT'})
-      }
-      onDecrement={() =>
-        store.dispatch({type: 'DECREMENT'})
-      }
-      />,
+    // <Counter
+    //   value={store.getState()}
+    //   onIncrement={() =>
+    //     store.dispatch({type: 'INCREMENT'})
+    //   }
+    //   onDecrement={() =>
+    //     store.dispatch({type: 'DECREMENT'})
+    //   }
+    //   />,
+    //   <SpendingTable />,
+    <App/>,
     document.getElementById('root')
   );
 };
