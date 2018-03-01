@@ -1,15 +1,22 @@
-import { createStore } from 'redux';
+import { createStore, combineReducers } from 'redux';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-function counter(state = 0, action) {
+function countReducer(state = {counter: 0}, action) {
   switch (action.type) {
   case 'INCREMENT':
-    return state + 1
+    return {
+      ...state,
+      counter: (state.counter+1)
+    }
   case 'DECREMENT':
-    return state - 1
+    return {
+      ...state,
+      counter: (state.counter-1)
+    }
   default:
-    return state
+    console.info(`state ${JSON.stringify(state)} : action : ${action} `);
+    return state;
   }
 }
 
@@ -52,7 +59,7 @@ const SpendingTable = ({}) => (
 const App = () => (
   <div>
     <Counter
-      value={store.getState()}
+      value={store.getState().countReducer.counter}
       onIncrement={() =>
         store.dispatch({type: 'INCREMENT'})
       }
@@ -87,7 +94,11 @@ const App = () => (
 //   return { getState, dispatch, subscribe };
 // }
 // let store = createStore(counter);
-let store = createStore(counter,window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+// let store = createStore(counter,window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+const store = createStore(
+  combineReducers({ countReducer: countReducer})
+  ,window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+)
 
 const render = () => {
   // document.body.innerText = store.getState();
