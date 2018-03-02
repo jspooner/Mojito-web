@@ -1,6 +1,7 @@
 import { createStore, combineReducers } from 'redux';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import ReactTable from 'react-table';
 
 function budgetReducer(state = {}, action) {
   switch (action.type) {
@@ -9,13 +10,17 @@ function budgetReducer(state = {}, action) {
       .then(function(response) {
         return response.json()
       }).then(function(json) {
-        console.log('parsed json', json)
+        console.log('BUDGET json', json)
         store.dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: json})
       }).catch(function(ex) {
         console.log('parsing failed', ex)
       })
     return state
   case 'BUDGET_REQUEST_FAILED':
+    return {
+      ...state,
+      budget: "ERROR"
+    }
   case 'BUDGET_REQUEST_SUCCESS':
     return {
       ...state,
@@ -58,28 +63,37 @@ const Counter = ({
 );
 
 // components/SpendingTable.js
-const SpendingTable = ({}) => (
-  <table>
-    <thead>
-      <tr>
-        <th>Category</th>
-        <th>2018-01</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Shopping</td>
-        <td>$100.00</td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td>Auto Payment</td>
-        <td>$400.00</td>
-      </tr>
-    </tfoot>
-  </table>
-)
+class SpendingTable extends React.Component {
+  constructor() {
+    super();
+    
+    this.state = {
+      data: [
+      {id: 1, category: 'Gob', value: '2'},
+      {id: 2, category: 'Buster', value: '5'},
+      {id: 3, category: 'George Michael', value: '4'}
+    ]
+    };
+  }
+    
+  render() {
+    const { data } = this.state;
+    return (
+      <div>
+        <ReactTable
+          data={data}
+          columns={[
+            {
+              Header: 'Category',
+              accessor: 'category'
+            }
+          ]}
+        />
+      </div>
+    )
+  }
+}
+
 
 const App = () => (
   <div>
@@ -92,7 +106,7 @@ const App = () => (
         store.dispatch({type: 'DECREMENT'})
       }
       />
-      <SpendingTable />
+      <SpendingTable data={store.getState()['budgetReducer']['budget'] } />
   </div>
 )
 // Example of createStore from scratch
