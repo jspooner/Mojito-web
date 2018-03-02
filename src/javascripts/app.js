@@ -2,6 +2,7 @@ import { createStore, combineReducers } from 'redux';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactTable from 'react-table';
+import "../stylesheets/styles.scss";
 
 const initState = {
   budget: { debits: [], credits: [] }
@@ -16,7 +17,6 @@ function budgetReducer(state = initState, action) {
     }
   case 'BUDGET_REQUEST_SUCCESS':
     console.log('BUDGET_REQUEST_SUCCESS', state)
-    debugger
     return {
       ...state,
       budget: action.data
