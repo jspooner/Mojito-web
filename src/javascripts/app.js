@@ -3,25 +3,20 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactTable from 'react-table';
 
-function budgetReducer(state = {}, action) {
+const initState = {
+  budget: { debits: [], credits: [] }
+}
+
+function budgetReducer(state = initState, action) {
   switch (action.type) {
-  case 'BUDGET_REQUEST':
-    fetch('http://localhost:3000/budget')
-      .then(function(response) {
-        return response.json()
-      }).then(function(json) {
-        console.log('BUDGET json', json)
-        store.dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: json})
-      }).catch(function(ex) {
-        console.log('parsing failed', ex)
-      })
-    return state
   case 'BUDGET_REQUEST_FAILED':
     return {
       ...state,
-      budget: "ERROR"
+      budget: { type: 'BUDGET_REQUEST_SUCCESS', }
     }
   case 'BUDGET_REQUEST_SUCCESS':
+    console.log('BUDGET_REQUEST_SUCCESS', state)
+    debugger
     return {
       ...state,
       budget: action.data
@@ -64,20 +59,9 @@ const Counter = ({
 
 // components/SpendingTable.js
 class SpendingTable extends React.Component {
-  constructor() {
-    super();
-    
-    this.state = {
-      data: [
-      {id: 1, category: 'Gob', value: '2'},
-      {id: 2, category: 'Buster', value: '5'},
-      {id: 3, category: 'George Michael', value: '4'}
-    ]
-    };
-  }
-    
+        
   render() {
-    const { data } = this.state;
+    const { data } = this.props;
     return (
       <div>
         <ReactTable
@@ -94,21 +78,49 @@ class SpendingTable extends React.Component {
   }
 }
 
+class App extends React.Component {
+  
+  getData() {
+    console.log(store.getState())
+    // return store.getState()['budgetReducer']['budget']['debits'] || []
+    return store.getState().budgetReducer.budget.debits
+  }
+  
+  render() {
+    const data = this.getData();
+    console.log(data)
+    return (
+      <div>
+        <Counter
+          // value={store.getState().countReducer.counter}
+          onIncrement={() =>
+            store.dispatch({type: 'INCREMENT'})
+          }
+          onDecrement={() =>
+            store.dispatch({type: 'DECREMENT'})
+          }
+          />
+          <SpendingTable data={data} />
+      </div> 
+    )
+  }
+}
+// const App = () => (
+//   <div>
+//     <Counter
+//       value={store.getState().countReducer.counter}
+//       onIncrement={() =>
+//         store.dispatch({type: 'INCREMENT'})
+//       }
+//       onDecrement={() =>
+//         store.dispatch({type: 'DECREMENT'})
+//       }
+//       />
+//       <SpendingTable data={store.getState()['budgetReducer']['budget'] } />
+//   </div>
+// )
 
-const App = () => (
-  <div>
-    <Counter
-      value={store.getState().countReducer.counter}
-      onIncrement={() =>
-        store.dispatch({type: 'INCREMENT'})
-      }
-      onDecrement={() =>
-        store.dispatch({type: 'DECREMENT'})
-      }
-      />
-      <SpendingTable data={store.getState()['budgetReducer']['budget'] } />
-  </div>
-)
+
 // Example of createStore from scratch
 // const createStore = (reducer) => {
 //   let state;
@@ -135,7 +147,7 @@ const App = () => (
 // let store = createStore(counter);
 // let store = createStore(counter,window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
 const store = createStore(
-  combineReducers({ countReducer: countReducer, budgetReducer: budgetReducer})
+  combineReducers({budgetReducer})
   ,window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 )
 
@@ -158,7 +170,22 @@ const render = () => {
 };
 store.subscribe(render)
 render();
-store.dispatch({type: 'BUDGET_REQUEST'})
+
+// fetch('http://localhost:3001/budget')
+//   .then(function(response) {
+//     return response.json()
+//   }).then(function(json) {
+//     console.log('BUDGET json', json)
+//     store.dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: json})
+//   }).catch(function(ex) {
+//     console.log('parsing failed', ex)
+//   })
+
+store.dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: {
+  credits: [{category: 'Income'}],
+  debits: [{category: 'Shopping'}]
+  }})
+
 
 // const render
 
