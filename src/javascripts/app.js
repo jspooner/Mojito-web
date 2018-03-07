@@ -58,8 +58,7 @@ const Counter = ({
 );
 
 // components/SpendingTable.js
-class SpendingTable extends React.Component {
-        
+class SpendingTable extends React.Component {       
   render() {
     const { data } = this.props;
     return (
@@ -77,9 +76,36 @@ class SpendingTable extends React.Component {
     )
   }
 }
+class SpendingTableContainer extends React.Component {
+  // https://www.sitepoint.com/bind-javascripts-this-keyword-react/
+  constructor(props) {
+    super(props);
+    this.store = props.store
+  }
+  state = {}
+  componentDidMount() {
+    fetch('http://localhost:3000/budget').then((response) => {
+      return response.json();
+    })
+    .then((json) => {
+      this.setState(json);
+      store.dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: json})
+    })
+    .catch((exception) => {
+      console.log('parsing failed', ex)
+      this.setState({ error: exception });
+    })
+  }
+  
+  render() {
+    return (
+      <SpendingTable data={this.data} />
+    )
+  }
+}
+
 
 class App extends React.Component {
-  
   getData() {
     console.log(store.getState())
     // return store.getState()['budgetReducer']['budget']['debits'] || []
@@ -101,6 +127,7 @@ class App extends React.Component {
           }
           />
           <SpendingTable data={data} />
+          <SpendingTableContainer store={store} />
       </div> 
     )
   }
