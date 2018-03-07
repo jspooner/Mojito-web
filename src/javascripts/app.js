@@ -1,5 +1,5 @@
 import { createStore, combineReducers } from 'redux';
-import React from 'react';
+import React, {PureComponent} from 'react';
 import ReactDOM from 'react-dom';
 import ReactTable from 'react-table';
 import "../stylesheets/styles.scss";
@@ -132,6 +132,9 @@ class App extends React.Component {
     )
   }
 }
+class Root extends PureComponent {
+  
+}
 // const App = () => (
 //   <div>
 //     <Counter
@@ -223,3 +226,38 @@ store.dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: {
 
 
 
+
+
+// https://github.com/reactjs/react-redux/blob/master/docs/api.md#connectmapstatetoprops-mapdispatchtoprops-mergeprops-options
+
+// import { addTodo, deleteTodo } from './actionCreators'
+//
+// function mapStateToProps(state) {
+//   return { todos: state.todos }
+// }
+//
+// const mapDispatchToProps = {
+//   addTodo,
+//   deleteTodo
+// }
+//
+// export default connect(mapStateToProps, mapDispatchToProps)(TodoApp)
+
+// const budgetRequestSuccessAction = () => {
+//   return {
+//     type: 'BUDGET_REQUEST_SUCCESS', data: {
+//       credits: [{category: 'Income'}],
+//       debits: [{category: 'Shopping'}]
+//     }
+//   }
+// }
+//
+// function mapStateToProps(state) {
+//   return { debits: state.budget.debits }
+// }
+//
+// const mapDispatchToProps = {
+//   budgetRequestSuccessAction
+// }
+//
+// export default connect(mapStateToProps, mapDispatchToProps)(App)
