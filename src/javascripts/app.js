@@ -1,7 +1,11 @@
-import { createStore, combineReducers } from 'redux';
+
 import React, {PureComponent} from 'react';
 import ReactDOM from 'react-dom';
+import { createStore, combineReducers } from 'redux';
+import createHistory from 'history/createBrowserHistory';
+
 import ReactTable from 'react-table';
+
 import "../stylesheets/styles.scss";
 
 const initState = {
@@ -104,14 +108,31 @@ class SpendingTableContainer extends React.Component {
   }
 }
 
+/** RootContainer.js **/
+import PropTypes from 'prop-types';
+import {Provider} from 'react-redux';
+import {ConnectedRouter} from 'react-router-redux';
+class RootContainer extends PureComponent {
+  static propTypes = {
+    history: PropTypes.object.isRequired,
+    store: PropTypes.object.isRequired
+  }
+  render() {
+    return (
+      <Provider store={this.props.store}>
+        <AppContainer></AppContainer>
+      </Provider>
+    );
+  }
+}
 
-class App extends React.Component {
+/** AppContainer.js **/
+class AppContainer extends PureComponent {
   getData() {
     console.log(store.getState())
-    // return store.getState()['budgetReducer']['budget']['debits'] || []
     return store.getState().budgetReducer.budget.debits
   }
-  
+
   render() {
     const data = this.getData();
     console.log(data)
@@ -128,28 +149,10 @@ class App extends React.Component {
           />
           <SpendingTable data={data} />
           <SpendingTableContainer store={store} />
-      </div> 
+      </div>
     )
   }
 }
-class Root extends PureComponent {
-  
-}
-// const App = () => (
-//   <div>
-//     <Counter
-//       value={store.getState().countReducer.counter}
-//       onIncrement={() =>
-//         store.dispatch({type: 'INCREMENT'})
-//       }
-//       onDecrement={() =>
-//         store.dispatch({type: 'DECREMENT'})
-//       }
-//       />
-//       <SpendingTable data={store.getState()['budgetReducer']['budget'] } />
-//   </div>
-// )
-
 
 // Example of createStore from scratch
 // const createStore = (reducer) => {
@@ -176,30 +179,37 @@ class Root extends PureComponent {
 // }
 // let store = createStore(counter);
 // let store = createStore(counter,window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+const rootElement = document.getElementById('root');
+const history = createHistory();
 const store = createStore(
   combineReducers({budgetReducer})
   ,window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-)
+);
 
-const render = () => {
-  // document.body.innerText = store.getState();
-  ReactDOM.render(
-    // <Counter
-    //   value={store.getState()}
-    //   onIncrement={() =>
-    //     store.dispatch({type: 'INCREMENT'})
-    //   }
-    //   onDecrement={() =>
-    //     store.dispatch({type: 'DECREMENT'})
-    //   }
-    //   />,
-    //   <SpendingTable />,
-    <App/>,
-    document.getElementById('root')
-  );
-};
-store.subscribe(render)
-render();
+if (process.env.NODE_ENV === 'production') {
+  ReactDOM.render(<RootContainer store={store} history={history} />, rootElement );
+} else {
+  require('react-hot-loader');
+  const renderWithHotReload = (RootContainer) => {
+    const AppContainer = require('react-hot-loader').AppContainer;
+    ReactDOM.render(
+      <AppContainer>
+        <RootContainer store={store} history={history} />
+      </AppContainer>,
+      rootElement
+    );
+  };
+  renderWithHotReload(RootContainer);
+  if (module.hot) {
+    // module.hot.accept('./containers/Root', () => {
+    //   console.info("Applying Hot Update!");
+    //   const nextRootContainer = require('./containers/Root').default;
+    //   renderWithHotReload(nextRootContainer);
+    // });
+  }
+}
+
+
 
 // fetch('http://localhost:3001/budget')
 //   .then(function(response) {
@@ -210,19 +220,6 @@ render();
 //   }).catch(function(ex) {
 //     console.log('parsing failed', ex)
 //   })
-
-store.dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: {
-  credits: [{category: 'Income'}],
-  debits: [{category: 'Shopping'}]
-  }})
-
-
-// const render
-
-// document.addEventListener('click', () => {
-//   store.dispatch({ type: 'INCREMENT' })
-//   // store.dispatch({ type: 'DECREMENT' })
-// });
 
 
 
