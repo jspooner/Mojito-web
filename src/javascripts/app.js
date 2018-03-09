@@ -1,205 +1,119 @@
-
 import React, {PureComponent} from 'react';
 import ReactDOM from 'react-dom';
-import { createStore, combineReducers } from 'redux';
-import createHistory from 'history/createBrowserHistory';
+import {Provider} from 'react-redux';
 
+import PropTypes from 'prop-types';
+import {ConnectedRouter} from 'react-router-redux';
+
+
+import { applyMiddleware, createStore, combineReducers } from 'redux';
+import logger from 'redux-logger'
+import thunk from 'redux-thunk'
+import createHistory from 'history/createBrowserHistory';
+import {connect} from 'react-redux'
 import ReactTable from 'react-table';
 
 import "../stylesheets/styles.scss";
 
+/** /actions **/
+
+function fetchBudget() {
+  return function(dispatch) {
+    fetch('http://localhost:3000/budget').then((response) => {
+      return response.json();
+    })
+    .then((json) => {
+      console.log(json);
+      dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: json})
+    })
+    .catch((exception) => {
+      console.log('parsing failed', exception)
+      dispatch({type: 'BUDGET_REQUEST_FAILED', data: exception})
+    })
+  }
+}
+
+/** /reducers **/
 const initState = {
-  budget: { debits: [], credits: [] }
+  budget: { debits: [{category: 'none'}], credits: [] }
 }
 
 function budgetReducer(state = initState, action) {
   switch (action.type) {
   case 'BUDGET_REQUEST_FAILED':
-    return {
-      ...state,
-      budget: { type: 'BUDGET_REQUEST_SUCCESS', }
-    }
+    return { ...state, budget: null }
   case 'BUDGET_REQUEST_SUCCESS':
-    console.log('BUDGET_REQUEST_SUCCESS', state)
-    return {
-      ...state,
-      budget: action.data
-    }
+    return { ...state, budget: action.data }
+  case 'FETCH_BUDGET':
   default:
-    console.info(`state ${JSON.stringify(state)} : action : ${action} `);
-    return state;
+    return {...state};
   }
 }
 
-function countReducer(state = {counter: 0}, action) {
-  switch (action.type) {
-  case 'INCREMENT':
-    return {
-      ...state,
-      counter: (state.counter+1)
-    }
-  case 'DECREMENT':
-    return {
-      ...state,
-      counter: (state.counter-1)
-    }
-  default:
-    console.info(`state ${JSON.stringify(state)} : action : ${action} `);
-    return state;
-  }
-}
-
-const Counter = ({
-  value,
-  onIncrement,
-  onDecrement
-}) => (
-  <div>
-    <h1>{value}</h1>
-    <button onClick={onIncrement}>+</button>
-    <button onClick={onDecrement}>-</button>
-  </div>
+/** store.js **/
+const history = createHistory();
+const middleware = applyMiddleware(thunk, logger)
+const store = createStore(
+  combineReducers({budgetReducer})
+  , window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+  , middleware
 );
 
-// components/SpendingTable.js
-class SpendingTable extends React.Component {       
+/** /components/Layout **/
+class SpendingTable extends React.Component {
   render() {
     const { data } = this.props;
+    const keys = Object.keys(data[0]);
+    const columns = keys.map( d => ({ Header: d, accessor: d }) )
+    // debugger
     return (
       <div>
         <ReactTable
           data={data}
-          columns={[
-            {
-              Header: 'Category',
-              accessor: 'category'
-            }
-          ]}
+          columns={columns}
         />
       </div>
     )
   }
 }
-class SpendingTableContainer extends React.Component {
-  // https://www.sitepoint.com/bind-javascripts-this-keyword-react/
-  constructor(props) {
-    super(props);
-    this.store = props.store
+
+class LayoutDumb extends React.Component {
+  componentWillMount() {
+    this.props.store.dispatch(fetchBudget())
   }
-  state = {}
-  componentDidMount() {
-    fetch('http://localhost:3000/budget').then((response) => {
-      return response.json();
-    })
-    .then((json) => {
-      this.setState(json);
-      store.dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: json})
-    })
-    .catch((exception) => {
-      console.log('parsing failed', ex)
-      this.setState({ error: exception });
-    })
-  }
-  
   render() {
+    // console.log(this.props)
+    const { debits } = this.props.budget;
+    // const mappedDebits = debits.map(d => <li key={d.category}>{d.category}</li>)
     return (
-      <SpendingTable data={this.data} />
+      <SpendingTable data={debits}/>
     )
   }
 }
-
-/** RootContainer.js **/
-import PropTypes from 'prop-types';
-import {Provider} from 'react-redux';
-import {ConnectedRouter} from 'react-router-redux';
-class RootContainer extends PureComponent {
-  static propTypes = {
-    history: PropTypes.object.isRequired,
-    store: PropTypes.object.isRequired
+/** Layout + Controller **/
+const Layout = connect((store) => {
+  return {
+    budget: store.budgetReducer.budget
   }
-  render() {
-    return (
-      <Provider store={this.props.store}>
-        <AppContainer></AppContainer>
-      </Provider>
-    );
-  }
-}
+})(LayoutDumb)
 
-/** AppContainer.js **/
-class AppContainer extends PureComponent {
-  getData() {
-    console.log(store.getState())
-    return store.getState().budgetReducer.budget.debits
-  }
 
-  render() {
-    const data = this.getData();
-    console.log(data)
-    return (
-      <div>
-        <Counter
-          // value={store.getState().countReducer.counter}
-          onIncrement={() =>
-            store.dispatch({type: 'INCREMENT'})
-          }
-          onDecrement={() =>
-            store.dispatch({type: 'DECREMENT'})
-          }
-          />
-          <SpendingTable data={data} />
-          <SpendingTableContainer store={store} />
-      </div>
-    )
-  }
-}
-
-// Example of createStore from scratch
-// const createStore = (reducer) => {
-//   let state;
-//   let listeners = [];
-//
-//   const getState = () => state;
-//
-//   const dispatch = (action) => {
-//     state = reducer(state, action);
-//     listeners.forEach(listener => listener());
-//   };
-//
-//   const subscribe = (listener) => {
-//     listeners.push(listener);
-//     return () => {
-//       listeners = listeners.filter(l => l !== listener);
-//     };
-//   };
-//
-//   dispatch({});
-//
-//   return { getState, dispatch, subscribe };
-// }
-// let store = createStore(counter);
-// let store = createStore(counter,window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+/** app.js **/
 const rootElement = document.getElementById('root');
-const history = createHistory();
-const store = createStore(
-  combineReducers({budgetReducer})
-  ,window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-);
-
 if (process.env.NODE_ENV === 'production') {
-  ReactDOM.render(<RootContainer store={store} history={history} />, rootElement );
+  ReactDOM.render(<Layout store={store} history={history} />, rootElement );
 } else {
   require('react-hot-loader');
-  const renderWithHotReload = (RootContainer) => {
+  const renderWithHotReload = (Layout) => {
     const AppContainer = require('react-hot-loader').AppContainer;
     ReactDOM.render(
       <AppContainer>
-        <RootContainer store={store} history={history} />
+        <Layout store={store} history={history} />
       </AppContainer>,
       rootElement
     );
   };
-  renderWithHotReload(RootContainer);
+  renderWithHotReload(Layout);
   if (module.hot) {
     // module.hot.accept('./containers/Root', () => {
     //   console.info("Applying Hot Update!");
@@ -208,53 +122,3 @@ if (process.env.NODE_ENV === 'production') {
     // });
   }
 }
-
-
-
-// fetch('http://localhost:3001/budget')
-//   .then(function(response) {
-//     return response.json()
-//   }).then(function(json) {
-//     console.log('BUDGET json', json)
-//     store.dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: json})
-//   }).catch(function(ex) {
-//     console.log('parsing failed', ex)
-//   })
-
-
-
-
-
-// https://github.com/reactjs/react-redux/blob/master/docs/api.md#connectmapstatetoprops-mapdispatchtoprops-mergeprops-options
-
-// import { addTodo, deleteTodo } from './actionCreators'
-//
-// function mapStateToProps(state) {
-//   return { todos: state.todos }
-// }
-//
-// const mapDispatchToProps = {
-//   addTodo,
-//   deleteTodo
-// }
-//
-// export default connect(mapStateToProps, mapDispatchToProps)(TodoApp)
-
-// const budgetRequestSuccessAction = () => {
-//   return {
-//     type: 'BUDGET_REQUEST_SUCCESS', data: {
-//       credits: [{category: 'Income'}],
-//       debits: [{category: 'Shopping'}]
-//     }
-//   }
-// }
-//
-// function mapStateToProps(state) {
-//   return { debits: state.budget.debits }
-// }
-//
-// const mapDispatchToProps = {
-//   budgetRequestSuccessAction
-// }
-//
-// export default connect(mapStateToProps, mapDispatchToProps)(App)
