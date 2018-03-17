@@ -5,7 +5,6 @@ import {Provider} from 'react-redux';
 import PropTypes from 'prop-types';
 import {ConnectedRouter} from 'react-router-redux';
 
-
 import { applyMiddleware, createStore, combineReducers } from 'redux';
 import logger from 'redux-logger'
 import thunk from 'redux-thunk'
@@ -17,25 +16,8 @@ import "../stylesheets/styles.scss";
 
 /** /actions **/
 
-function fetchBudget() {
-  return function(dispatch) {
-    fetch('http://localhost:3000/budget').then((response) => {
-      return response.json();
-    })
-    .then((json) => {
-      console.log(json);
-      dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: json})
-    })
-    .catch((exception) => {
-      console.log('parsing failed', exception)
-      dispatch({type: 'BUDGET_REQUEST_FAILED', data: exception})
-    })
-  }
-}
-
 /** /reducers **/
 const initState = {
-  budget: { debits: [{category: 'none'}], credits: [] }
 }
 
 function budgetReducer(state = initState, action) {
@@ -59,43 +41,148 @@ const store = createStore(
   , middleware
 );
 
-/** /components/Layout **/
-class SpendingTable extends React.Component {
+/** /components **/
+class IncomeTable extends React.Component {
   render() {
-    const { data } = this.props;
-    const keys = Object.keys(data[0]);
-    const columns = keys.map( d => ({ Header: d, accessor: d }) )
-    // debugger
+    const { income } = this.props;
+    if (!income) {
+      return (
+        <div>Loading</div>
+      )
+    }
+    const keys = Object.keys(income[0]);
+    const dateColumns = keys.filter(word => !['category','average','total']
+      .includes(word))
+      .map( d => ({ Header: d, accessor: d, width: 80 } ) )
+    const columns = [{
+      Header: 'Category',
+      accessor: 'category',
+      width: 200,
+      class: 'category'
+    }].concat(dateColumns).concat([{
+      Header: 'Average',
+      accessor: 'average',
+      width: 100
+    }, {
+      Header: 'Total',
+      accessor: 'total',
+      width: 100
+    }])
     return (
       <div>
         <ReactTable
-          data={data}
+          data={income}
           columns={columns}
+          className="-striped -highlight"
+          defaultPageSize={income.length}
+          showPagination={false}
+          defaultSorted={[{id: "total",desc: true}]}
         />
       </div>
     )
   }
 }
-
-class LayoutDumb extends React.Component {
-  componentWillMount() {
-    this.props.store.dispatch(fetchBudget())
-  }
+class BudgetTable extends React.Component {
   render() {
-    // console.log(this.props)
-    const { debits } = this.props.budget;
-    // const mappedDebits = debits.map(d => <li key={d.category}>{d.category}</li>)
+    const { budget, totals } = this.props;
+    if (!budget) {
+      return (
+        <div>Loading</div>
+      )
+    }
+    const keys = Object.keys(budget[0]);
+    const dateColumns = keys.filter(word => !['category','average','total']
+      .includes(word))
+      .map( d => ({ Header: d, accessor: d, width: 80, Footer: (<div>{" "}{
+        this.props.totals[d]
+        // Collect the data by column and sum
+        // console.log(this.props.data[0][d]) 
+      }</div>) }) )
+    const columns = [{
+      Header: 'Category',
+      accessor: 'category',
+      width: 200,
+      class: 'category'
+    }].concat(dateColumns).concat([{
+      Header: 'Average',
+      accessor: 'average',
+      width: 100
+    }, {
+      Header: 'Total',
+      accessor: 'total',
+      width: 100
+    }])
     return (
-      <SpendingTable data={debits}/>
+      <div>
+        <ReactTable
+          data={budget}
+          columns={columns}
+          className="-striped -highlight"
+          defaultPageSize={budget.length}
+          showPagination={false}
+          defaultSorted={[{id: "total",desc: true}]}
+        />
+      </div>
     )
   }
 }
-/** Layout + Controller **/
+/** /layouts **/
+class LayoutDumb extends React.Component {
+  static propTypes = {
+    fetchBudget: PropTypes.func.isRequired,
+    budget: PropTypes.object,
+    totals: PropTypes.object,
+    income: PropTypes.object
+  }
+  static defaultProps = {
+    income: {},
+    budget: {},
+    totals: {}
+  }
+  componentWillMount() {
+    // Dumb component shouln't know about fetchBudget
+    // this.props.store.dispatch(fetchBudget())
+    // if(!this.props.budget) {
+      this.props.fetchBudget()
+    // }
+  }
+  render() {
+    // console.log(this.props)
+    const { totals, budget, income } = this.props.budget;
+    return (
+      <div>
+        <h1>Budget</h1>
+        <IncomeTable income={income} />
+        <BudgetTable budget={budget} totals={totals} />
+      </div>
+    )
+  }
+}
+
+/** Container **/
+// container component pattern.
+// containers vs components https://www.youtube.com/watch?v=KYzlpRvWZ6c&feature=youtu.be&t=22m32s
+function fetchBudget() {
+  return function(dispatch) {
+    fetch('http://localhost:3000/budget').then((response) => {
+      return response.json();
+    })
+    .then((json) => {
+      console.log(json);
+      dispatch({type: 'BUDGET_REQUEST_SUCCESS', data: json})
+    })
+    .catch((exception) => {
+      console.log('parsing failed', exception)
+      dispatch({type: 'BUDGET_REQUEST_FAILED', data: exception})
+    })
+  }
+}
+
 const Layout = connect((store) => {
   return {
     budget: store.budgetReducer.budget
   }
-})(LayoutDumb)
+}, {fetchBudget})(LayoutDumb)
 
 
 /** app.js **/
