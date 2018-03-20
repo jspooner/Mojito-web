@@ -18,6 +18,9 @@ import "../stylesheets/styles.scss";
 
 /** /reducers **/
 const initState = {
+  // budget: {
+  //   income: {}
+  // }
 }
 
 function budgetReducer(state = initState, action) {
@@ -25,6 +28,9 @@ function budgetReducer(state = initState, action) {
   case 'BUDGET_REQUEST_FAILED':
     return { ...state, budget: null }
   case 'BUDGET_REQUEST_SUCCESS':
+    // const keys        = Object.keys(action.data.income[0]);
+    // const dateColumns = keys.filter(word => !['category','average','total'].includes(word))
+
     return { ...state, budget: action.data }
   case 'FETCH_BUDGET':
   default:
@@ -67,7 +73,14 @@ class IncomeTable extends React.Component {
       Header: 'Total',
       accessor: 'total',
       width: 100
-    }])
+    },
+    {
+      Header: 'Category',
+      accessor: 'category-2',
+      width: 200
+    }]
+    // .concat(dateColumns)
+  )
     return (
       <div>
         <ReactTable
@@ -150,7 +163,7 @@ class LayoutDumb extends React.Component {
     // console.log(this.props)
     const { totals, budget, income } = this.props.budget;
     return (
-      <div>
+      <div id="budget">
         <h1>Budget</h1>
         <IncomeTable income={income} />
         <BudgetTable budget={budget} totals={totals} />

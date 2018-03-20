@@ -2,6 +2,15 @@
 body {
   font-family: "Helvetica", sans-serif;
   font-size: 9pt;
+  overflow-x: scroll;
+}
+
+div#root {
+  white-space: nowrap;
+}
+
+div#budget {
+  display: inline-block;
 }
 
 .ReactTable .rt-thead {
@@ -16,3 +25,5 @@ body {
 .ReactTable .rt-th, .ReactTable .rt-td {
   padding: 2px 3px;
 }
+
+
