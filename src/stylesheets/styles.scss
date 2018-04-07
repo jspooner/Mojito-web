@@ -1,8 +1,9 @@
 @import "~react-table/react-table.css";
 body {
-  font-family: "Helvetica", sans-serif;
-  font-size: 9pt;
+  font-family: "Helvetica Neue", sans-serif;
+  font-size: 10pt;
   overflow-x: scroll;
+  letter-spacing: 0.05em;
 }
 
 div#root {
@@ -13,17 +14,33 @@ div#budget {
   display: inline-block;
 }
 
+.ReactTable {
+  border: none;
+}
+
 .ReactTable .rt-thead {
   color: #fff;
-  background: rgb(91,161,207);
+  background: #47a0d2;
+  font-weight: 400;
 }
 
 .ReactTable .rt-thead .rt-th.-sort-desc, .ReactTable .rt-thead .rt-td.-sort-desc {
-    box-shadow: inset 0 -3px 0 0 rgba(255,255,255,0.6);
+    box-shadow: inset 0 -3px 0 0 #0D5F87;
 }
 
 .ReactTable .rt-th, .ReactTable .rt-td {
-  padding: 2px 3px;
+  padding: 5px 3px;
 }
 
+.rt-td {
+  font-weight: 300;
+}
+.rt-td.category {
+  font-weight: 400;
+  color: #fff;
+  background: #84d3fb;
+}
 
+.ReactTable .rt-tbody .rt-tr-group {
+    border-bottom: none;
+}

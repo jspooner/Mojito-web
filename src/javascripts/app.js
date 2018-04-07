@@ -64,7 +64,7 @@ class IncomeTable extends React.Component {
       Header: 'Category',
       accessor: 'category',
       width: 200,
-      class: 'category'
+      className: 'category'
     }].concat(dateColumns).concat([{
       Header: 'Average',
       accessor: 'average',
@@ -76,7 +76,7 @@ class IncomeTable extends React.Component {
     },
     {
       Header: 'Category',
-      accessor: 'category-2',
+      accessor: 'category',
       width: 200
     }]
     // .concat(dateColumns)
@@ -115,7 +115,7 @@ class BudgetTable extends React.Component {
       Header: 'Category',
       accessor: 'category',
       width: 200,
-      class: 'category'
+      className: 'category'
     }].concat(dateColumns).concat([{
       Header: 'Average',
       accessor: 'average',
